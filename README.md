@@ -26,7 +26,7 @@ Simulates realistic fan behaviour: attendance, engagement, spend, and churn.
 - At-risk segment identified with lowest engagement and CLV
 
 ## Dashboard
-![Dashboard](images/dashboard_screenshot.png)
+! I will refer you to test it on PowerBI the DAX(on the DAX section)
 
 ## How to Run
 ```bash
