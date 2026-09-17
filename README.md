@@ -1,19 +1,38 @@
-# eintracht-fan-analytics
-1. The purpose 
-Built an end-to-end fan analytics project to analyse fan engagement and predict churn for Eintracht Frankfurt.
+# Eintracht Frankfurt — Fan Analytics & Churn Prediction
 
-2. The data and scale
-Collected and cleaned 10,000+ fan records from multiple sources (attendance, social media, spend, app activity) using Python and SQL.
+Portfolio project analysing fan engagement and predicting churn for Eintracht Frankfurt.
 
-3. The KPIs you built
-Developed KPIs including fan engagement score, churn risk, customer lifetime value (CLV), and total spend per fan.
+## Objective
+Demonstrate end-to-end data analytics: data generation, SQL/Python cleaning, KPI development, segmentation, predictive modelling, and Power BI dashboards.
 
-4. The modelling work 
-Applied K-means clustering to segment fans into four groups (Casual, Loyal, Premium, At Risk) and built a logistic regression model to predict churn.
+## Tools
+Python, pandas, scikit-learn, SQL, Power BI (DAX), Git
 
-5. The dashboard
-Built an interactive Power BI dashboard with DAX measures to visualise segments, churn risk, and engagement trends.
+## Data
+Synthetic dataset of 10,000 fan records generated with `src/generate_data.py`.
+Simulates realistic fan behaviour: attendance, engagement, spend, and churn.
+**Note:** synthetic data is used because real fan data is not publicly available. The methodology mirrors a real club analytics workflow.
 
-6. The result and honesty 
-Churn model achieved 97.8 % accuracy, and the At Risk segment showed the lowest engagement and CLV — insight that would help a club target retention campaigns.
+## Project Steps
+1. Generate synthetic fan data
+2. Build KPIs (engagement score, CLV, total spend)
+3. Segment fans with K-means (Casual, Loyal, Premium, At Risk)
+4. Predict churn with logistic regression
+5. Visualise results in Power BI
 
+## Key Results
+- 4 fan segments identified
+- Churn model accuracy: ~75% (see `src/churn_model.py` output)
+- At-risk segment identified with lowest engagement and CLV
+
+## Dashboard
+![Dashboard](images/dashboard_screenshot.png)
+
+## How to Run
+```bash
+pip install -r requirements.txt
+python src/generate_data.py
+python src/build_features.py
+python src/segmentation.py
+python src/churn_model.py
+```
