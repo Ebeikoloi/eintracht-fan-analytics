@@ -1,1 +1,136 @@
+1. creating working environment
+setting locally: 
+mkdir eintracht-fan-analytics
+cd eintracht-fan-analytics
+git init
+git remote add origin https://github.com/Ebeikoloi/eintracht-fan-analytics.git
+mkdir -p data/raw data/processed notebooks src dashboard images
+
+2. Requirement gathering: Libraries: install all this libraries with: pip install -r requirements.txt
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.4.2
+matplotlib==3.8.4
+seaborn==0.13.2
+sqlalchemy==2.0.30
+jupyter==1.0.0
+
+3. src/generate_data.py
+Since real fan data is not public, you generate a realistic synthetic dataset.
+Be honest about this in the README — it’s a standard practice for portfolio projects.
+
+"""Generate synthetic Eintracht Frankfurt fan dataset for portfolio project."""
+import numpy as np
+import pandas as pd
+
+np.random.seed(42)
+N = 10000
+
+df = pd.DataFrame({
+    "fan_id": range(1, N + 1),
+    "age": np.random.randint(18, 75, N),
+    "membership_years": np.random.randint(0, 30, N),
+    "matches_attended_last_season": np.random.poisson(8, N),
+    "social_engagement_score": np.random.uniform(0, 100, N).round(1),
+    "merch_spend_eur": np.random.gamma(2, 40, N).round(2),
+    "ticket_spend_eur": np.random.gamma(3, 60, N).round(2),
+    "newsletter_opens": np.random.poisson(12, N),
+    "app_logins_last_90d": np.random.poisson(15, N),
+})
+
+# Churn logic: low engagement + low spend + few matches = higher churn
+churn_score = (
+    -0.05 * df["matches_attended_last_season"]
+    - 0.02 * df["social_engagement_score"]
+    - 0.001 * df["merch_spend_eur"]
+    - 0.03 * df["app_logins_last_90d"]
+    + 0.02 * df["age"]
+    + np.random.normal(0, 1, N)
+)
+df["churned"] = (churn_score > np.percentile(churn_score, 75)).astype(int)
+
+df.to_csv("data/raw/fans.csv", index=False)
+print(f"Generated {len(df)} fan records. Churn rate: {df['churned'].mean():.1%}")
+
+Run:
+python src/generate_data.py
+
+4. src/build_features.py
+"""Build KPIs and features for fan analytics."""
+import pandas as pd
+
+df = pd.read_csv("data/raw/fans.csv")
+
+df["total_spend_eur"] = df["merch_spend_eur"] + df["ticket_spend_eur"]
+df["engagement_score"] = (
+    0.4 * df["social_engagement_score"]
+    + 0.3 * df["app_logins_last_90d"]
+    + 0.3 * df["newsletter_opens"]
+)
+df["clv_estimate_eur"] = df["total_spend_eur"] * df["membership_years"].clip(lower=1)
+
+df.to_csv("data/processed/fans_features.csv", index=False)
+print(df[["engagement_score", "clv_estimate_eur", "churned"]].describe())
+
+5. src/segmentation.py
+
+"""K-means fan segmentation."""
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+df = pd.read_csv("data/processed/fans_features.csv")
+
+features = ["engagement_score", "total_spend_eur", "matches_attended_last_season"]
+X = StandardScaler().fit_transform(df[features])
+
+kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
+df["segment"] = kmeans.fit_predict(X)
+
+segment_names = {0: "Casual", 1: "Loyal", 2: "Premium", 3: "At Risk"}
+df["segment_name"] = df["segment"].map(segment_names)
+
+df.to_csv("data/processed/fans_segmented.csv", index=False)
+print(df.groupby("segment_name")[features + ["churned"]].mean().round(2))
+
+6. src/churn_model.py
+"""Logistic regression churn model with evaluation."""
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+df = pd.read_csv("data/processed/fans_segmented.csv")
+
+features = [
+    "age", "membership_years", "matches_attended_last_season",
+    "social_engagement_score", "merch_spend_eur", "ticket_spend_eur",
+    "newsletter_opens", "app_logins_last_90d", "engagement_score",
+]
+X = df[features]
+y = df["churned"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train, y_train)
+preds = model.predict(X_test)
+
+print(f"Accuracy: {accuracy_score(y_test, preds):.2%}")
+print(classification_report(y_test, preds))
+
+import joblib
+joblib.dump(model, "data/processed/churn_model.pkl")
+
+Run all:
+python src/build_features.py
+python src/segmentation.py
+python src/churn_model.py
+
+
+
+
+
 
