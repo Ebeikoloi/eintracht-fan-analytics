@@ -1,1 +1,30 @@
+Loaad the Data → Text/CSV → data/processed/fans_segmented.csv
+
+Create these DAX measures:
+
+Total Fans = COUNTROWS(fans_segmented)
+
+Churn Rate = DIVIDE(
+    CALCULATE(COUNTROWS(fans_segmented), fans_segmented[churned] = 1),
+    [Total Fans]
+)
+
+Avg CLV = AVERAGE(fans_segmented[clv_estimate_eur])
+
+Avg Engagement = AVERAGE(fans_segmented[engagement_score])
+
+At Risk Fans = CALCULATE(
+    COUNTROWS(fans_segmented),
+    fans_segmented[segment_name] = "At Risk"
+)
+
+Build visuals on :
+
+Card visuals: Total Fans, Churn Rate, Avg CLV, At Risk Fans
+
+Bar chart: Fans by segment
+
+Scatter plot: Engagement vs CLV, coloured by segment
+
+Line chart: Churn rate by membership years
 
