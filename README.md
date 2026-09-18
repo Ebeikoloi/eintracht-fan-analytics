@@ -14,10 +14,10 @@ Simulates realistic fan behaviour: attendance, engagement, spend, and churn.
 **Note:** synthetic data is used because real fan data is not publicly available. The methodology mirrors a real club analytics workflow.
 
 ## Project Steps
-1. Generate synthetic fan data
+1. I generated synthetic fan data
 2. Build KPIs (engagement score, CLV, total spend)
 3. Segment fans with K-means (Casual, Loyal, Premium, At Risk)
-4. Predict churn with logistic regression
+4. Predict churn with logistic regression and 
 5. Visualise results in Power BI
 
 ## Key Results
